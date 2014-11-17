@@ -9,9 +9,17 @@
     <version>1.0-SNAPSHOT</version>
     <name>jersey-spring-dwr</name>
     <description>Spike to test Jersey, Spring, and DWR</description>
+    
+    <properties>
+        <jersey.version>2.13</jersey.version>
+        <springsecurity.version>3.2.5.RELEASE</springsecurity.version>
+        <servlet.api.version>3.0.1</servlet.api.version>
+        <commons.logging.version>1.2</commons.logging.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
     <build>
-        <finalName>spring-and-dwr</finalName>
+        <finalName>${project.name}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -43,10 +51,18 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-bom</artifactId>
+                <version>${springsecurity.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
+        <!-- Jersey Dependencies -->
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet</artifactId>
@@ -57,9 +73,27 @@
             <artifactId>jersey-media-moxy</artifactId>
         </dependency>
         -->
+        <!-- Spring Security Dependencies -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+        </dependency>
+        <!-- Servlet Container Dependencies -->
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>${servlet.api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Logging Dependencies -->
+        <dependency>
+        	<groupId>commons-logging</groupId>
+        	<artifactId>commons-logging</artifactId>
+        	<version>${commons.logging.version}</version>
+        </dependency>
     </dependencies>
-    <properties>
-        <jersey.version>2.13</jersey.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 </project>
