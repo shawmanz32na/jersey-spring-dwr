@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html" />
+        <title>DWR Thin Chat Version 2.0</title>
+        <script type='text/javascript' src='dwr/engine.js'></script>
+        <script type='text/javascript' src='dwr/util.js'></script>
+        <script type='text/javascript' src='dwr/interface/Chat.js'></script>
+        <script type='text/javascript' src='index.js'></script>
+    </head>
+    <body>
+        <h1>Java Chat</h1>
+        <div id="dwrJavaChat">
+	        <p>
+	      		Your Message:
+	      		<input id="text" onkeypress="dwr.util.onReturn(event, sendMessage)"/>
+	      		<input type="button" value="Send" onclick="sendMessage()"/>
+	    	</p>
+	    	<hr/>
+	    	<ul id="chatlog" style="list-style-type:none;">
+	    	</ul>
+    	</div>
+    </body>
+</html>
+    
+        

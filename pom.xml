@@ -14,6 +14,7 @@
         <jersey.version>2.13</jersey.version>
         <springsecurity.version>3.2.5.RELEASE</springsecurity.version>
         <servlet.api.version>3.0.1</servlet.api.version>
+        <dwr.version>3.0.0-rc3-RELEASE</dwr.version>
         <commons.logging.version>1.2</commons.logging.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -79,6 +80,12 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-config</artifactId>
+        </dependency>
+        <!-- DWR Dependencies -->
+        <dependency>
+            <groupId>org.directwebremoting</groupId>
+            <artifactId>dwr</artifactId>
+            <version>${dwr.version}</version>
         </dependency>
         <!-- Servlet Container Dependencies -->
         <dependency>
