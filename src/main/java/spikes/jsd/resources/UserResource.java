@@ -31,5 +31,4 @@ public class UserResource {
 		return user;
 	}
 	
-	
 }
