@@ -26,6 +26,19 @@ public final class ChatMessageStore {
 			return new ArrayList<ChatMessage>(chatMessages);
 		}
 	}
+	
+	public List<ChatMessage> getAllChatMessagesAfter(Long id) {
+		synchronized (chatMessages) {
+			List<ChatMessage> laterChatMessages = new ArrayList<ChatMessage>();
+			for (int i = 0; i < chatMessages.size(); i++) {
+				ChatMessage chatMessageToCompare = chatMessages.get(i);
+				if (chatMessageToCompare.getId() > id) {
+					laterChatMessages.addAll(chatMessages.subList(i, chatMessages.size()));
+				}
+			}
+			return laterChatMessages;
+		}
+	}
 
 	public ChatMessage getChatMessage(Long id) {
 		// TODO: Is there a smarter way to do this?

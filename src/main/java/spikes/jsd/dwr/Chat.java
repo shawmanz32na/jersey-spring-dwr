@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.directwebremoting.Browser;
 import org.directwebremoting.ScriptSession;
+import org.directwebremoting.ScriptSessions;
 import org.directwebremoting.WebContextFactory;
 import org.directwebremoting.annotations.RemoteMethod;
 import org.directwebremoting.annotations.RemoteProxy;
@@ -33,6 +34,14 @@ public final class Chat {
 				.getScriptSession();
 		scriptSession
 				.removeAttribute(SubscriptionFilter.SUBSCRIBED_SESSION_ATTRIBUTE);
+	}
+	
+	public static void onChatMessage() {
+		Browser.withAllSessionsFiltered(new SubscriptionFilter(), new Runnable() {
+			public void run() {
+				ScriptSessions.addFunctionCall("onMessageReceived");
+			}
+		});
 	}
 
 	public static void updateClients(final List<ChatMessage> chatMessages) {

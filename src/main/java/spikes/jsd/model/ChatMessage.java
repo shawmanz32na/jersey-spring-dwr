@@ -1,12 +1,8 @@
 package spikes.jsd.model;
 
-import org.directwebremoting.annotations.DataTransferObject;
-import org.directwebremoting.annotations.RemoteProperty;
-
 /**
  * A POJO that represents a typed chat message
  */
-@DataTransferObject
 public class ChatMessage {
 
 	/**
@@ -17,19 +13,17 @@ public class ChatMessage {
 	/**
 	 * The username of the user that sent the message
 	 */
-	@RemoteProperty
 	private String username;
 
 	/**
 	 * The text of the message
 	 */
-	@RemoteProperty
 	private String text;
 
 	/**
 	 * Empty default constructor required for JAXB Serialization
 	 */
-	public ChatMessage() {
+	ChatMessage() {
 	}
 
 	/**
@@ -51,6 +45,12 @@ public class ChatMessage {
 	 */
 	public long getId() {
 		return id;
+	}
+
+	// We don't want anyone but the constructor setting the Id. However, JAXB needs to have a setter to be able to serialize the property.
+	@SuppressWarnings("unused")
+	private void setId(long id) {
+		this.id = id;
 	}
 
 	/**
