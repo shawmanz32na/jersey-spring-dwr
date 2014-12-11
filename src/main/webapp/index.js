@@ -3,84 +3,100 @@
  */
 window.onload = function() {
 	dwr.engine.setActiveReverseAjax(true);
-	_getNewMessages();
+	_displayNewMessages();
 	Chat.subscribe();
-	
+
 	// Create Event Handlers
-	initialize();
+	_initialize();
 };
 
-function initialize() {
-	document.getElementById("text").addEventListener("keypress", function(event) {
-		dwr.util.onReturn(event, sendMessage);
-	});
+/**
+ * Creates Event Handlers
+ */
+function _initialize() {
+	document.getElementById("text").addEventListener("keypress",
+			function(event) {
+				dwr.util.onReturn(event, sendMessage);
+			});
 	document.getElementById("sendButton").addEventListener("click", function() {
 		sendMessage();
 	});
 }
 
+/**
+ * Sends the text in the message text box as a Chat Message to the server
+ */
 function sendMessage() {
 	var chatMessage = {};
 	chatMessage.text = dwr.util.getValue("text");
-	
+
 	var json = JSON.stringify(chatMessage);
-	
+
 	var ajax = new XMLHttpRequest();
 	ajax.open("POST", "webapi/chat", true);
-	ajax.setRequestHeader('Content-type','application/json; charset=utf-8');
+	ajax.setRequestHeader('Content-type', 'application/json; charset=utf-8');
 	ajax.onreadystatechange = function() {
-        if (ajax.readyState != 4) return;
-        if (ajax.status == 204) {
-        	// If the POST was successful
-        	dwr.util.setValue("text", "");
-        }
-    };
-    ajax.send(json);
+		if (ajax.readyState != 4)
+			return;
+		if (ajax.status == 204) {
+			// If the POST was successful
+			dwr.util.setValue("text", "");
+		}
+	};
+	ajax.send(json);
 }
 
+/**
+ * Called when a new Chat Message has been received by the Server.
+ */
 function onMessageReceived() {
-	_getNewMessages();
+	_displayNewMessages();
 }
 
+function _displayNewMessages() {
+	var latestChatMessageId = _getLatestChatMessageId();
+	jsd.ChatMessageUtils.requestNewChatMessageIds(latestChatMessageId, _onNewChatMessageIdsResponse);
+}
+
+/**
+ * Gets the Chat Message ID of the most recent Chat Message displayed on the Screen
+ * @returns the most recent Chat Message ID, or null if no Chat Messages are being displayed
+ */
 function _getLatestChatMessageId() {
 	var chatlog = document.getElementById("chatlog");
 	var chatMessageListItems = chatlog.getElementsByTagName("li");
 	if (chatMessageListItems.length > 0) {
-		var chatMessageListItem =  chatMessageListItems.item(chatMessageListItems.length - 1);
+		var chatMessageListItem = chatMessageListItems.item(chatMessageListItems.length - 1);
 		return chatMessageListItem.getAttribute("data-chat-id");
 	} else {
 		return null;
 	}
 }
 
-function _getNewMessages() {
-	// Find the most recent Chat message we have
-	var latestChatMessageId = _getLatestChatMessageId();
-	var sinceIdQueryParam = latestChatMessageId == null ? "" : "?since_id=" + latestChatMessageId;
-	
-	// Get any new messages from the Server
-	var ajax = new XMLHttpRequest();
-	ajax.open("GET", "webapi/chat" + sinceIdQueryParam, true);
-	ajax.onreadystatechange = function() {
-		if (ajax.readyState != 4) return;
-		if (ajax.status == 200) {
-			var chatMessages = JSON.parse(ajax.responseText);
-			_updateChatList(chatMessages);
-		}
-	};
-	ajax.send();
+/**
+ * @param {Array.<Number>} newChatMessageIds - The Ids of the new ChatMessages available on the server
+ */
+function _onNewChatMessageIdsResponse(newChatMessageIds) {
+	for (var i = 0; i < newChatMessageIds.length; i++) {
+		var newChatMessageId = newChatMessageIds[i];
+		jsd.ChatMessageUtils.requestChatMessage(newChatMessageId, _onChatMessageResponse);
+	}
 }
 
-function _updateChatList(newMessages) {
+/**
+ * @param {jsd.ChatMessage} chatMessage
+ */
+function _onChatMessageResponse(chatMessage) {
+	// Add the new ChatMessage to the display
+	_updateChatList(chatMessage);
+}
+
+function _updateChatList(chatMessage) {
 	var chatlog = document.getElementById("chatlog");
-	if (newMessages instanceof Array) {
-		for(var i = 0; i < newMessages.length; i++) {
-			var chatMessage = newMessages[i];
-			var messageListItem = document.createElement("li");
-			messageListItem.setAttribute("data-chat-id", chatMessage.id);
-			var messageText = chatMessage.username + ": " + chatMessage.text;
-			messageListItem.appendChild(document.createTextNode(messageText));
-			chatlog.appendChild(messageListItem);
-		}
-	}
+	var messageListItem = document.createElement("li");
+	messageListItem.setAttribute("data-chat-id", chatMessage.id);
+	var messageText = chatMessage.username + ": " + chatMessage.text;
+	messageListItem.appendChild(document.createTextNode(messageText));
+	// TODO: Insert the new ChatMessage in order
+	chatlog.appendChild(messageListItem);
 }

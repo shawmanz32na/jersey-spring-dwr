@@ -37,6 +37,14 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.5</version>
                 <configuration>
+                    <!-- Configure the war plugin to put the javascript source in the js folder in the created war -->
+                    <webResources>
+                        <resource>
+                            <directory>src/main/javascript</directory>
+                            <targetPath>/</targetPath>
+                        </resource>
+                    </webResources>
+                    <!-- Tell Maven not to complain if there's not a web.xml file; We're using Servlet 3.0. -->
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
             </plugin>
