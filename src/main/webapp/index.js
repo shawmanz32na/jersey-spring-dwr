@@ -1,6 +1,10 @@
 /**
  * The JavaScript Source for the /index.html file
  */
+
+// public variables (gasp)
+var chatMessageResponseAggregator;
+
 window.onload = function() {
 	dwr.engine.setActiveReverseAjax(true);
 	_displayNewMessages();
@@ -50,35 +54,26 @@ function sendMessage() {
  * Called when a new Chat Message has been received by the Server.
  */
 function onMessageReceived() {
+	// TODO: Show an overlay that we're busy loading messages
 	_displayNewMessages();
 }
 
 function _displayNewMessages() {
-	var latestChatMessageId = _getLatestChatMessageId();
-	jsd.ChatMessageUtils.requestNewChatMessageIds(latestChatMessageId, _onNewChatMessageIdsResponse);
-}
-
-/**
- * Gets the Chat Message ID of the most recent Chat Message displayed on the Screen
- * @returns the most recent Chat Message ID, or null if no Chat Messages are being displayed
- */
-function _getLatestChatMessageId() {
-	var chatlog = document.getElementById("chatlog");
-	var chatMessageListItems = chatlog.getElementsByTagName("li");
-	if (chatMessageListItems.length > 0) {
-		var chatMessageListItem = chatMessageListItems.item(chatMessageListItems.length - 1);
-		return chatMessageListItem.getAttribute("data-chat-id");
-	} else {
-		return null;
-	}
+	// Providing 'null' will get us the Ids of all ChatMessages
+	jsd.ChatMessageUtils.requestNewChatMessageIds(null, _onNewChatMessageIdsResponse);
 }
 
 /**
  * @param {Array.<Number>} newChatMessageIds - The Ids of the new ChatMessages available on the server
  */
 function _onNewChatMessageIdsResponse(newChatMessageIds) {
+	// We want to capture all Responses before displaying any of them... This is a fancy way to keep them in order. ;-)
+	chatMessageResponseAggregator = new jsd.ResponseAggregator();
+	chatMessageResponseAggregator.setCallback(_onChatMessagesReceived);
+	chatMessageResponseAggregator.setExpectedResponses(newChatMessageIds.length);
 	for (var i = 0; i < newChatMessageIds.length; i++) {
 		var newChatMessageId = newChatMessageIds[i];
+		// Should we implement some sort of response aggregation to make sorting easier, then display all at once? It would be faster overall, but longer until the first update starts showing up...
 		jsd.ChatMessageUtils.requestChatMessage(newChatMessageId, _onChatMessageResponse);
 	}
 }
@@ -87,16 +82,33 @@ function _onNewChatMessageIdsResponse(newChatMessageIds) {
  * @param {jsd.ChatMessage} chatMessage
  */
 function _onChatMessageResponse(chatMessage) {
-	// Add the new ChatMessage to the display
-	_updateChatList(chatMessage);
+	chatMessageResponseAggregator.onResponseReceived(chatMessage);
 }
 
-function _updateChatList(chatMessage) {
+/**
+ * @param {Array.<jsd.ChatMessage>} chatMessages
+ */
+function _onChatMessagesReceived(chatMessages) {
+	// Sort them messages by Id
+	chatMessages.sort(function(a,b) {
+		return a.id - b.id;
+	});
+	_updateChatList(chatMessages);
+}
+
+function _updateChatList(chatMessages) {
 	var chatlog = document.getElementById("chatlog");
-	var messageListItem = document.createElement("li");
-	messageListItem.setAttribute("data-chat-id", chatMessage.id);
-	var messageText = chatMessage.username + ": " + chatMessage.text;
-	messageListItem.appendChild(document.createTextNode(messageText));
-	// TODO: Insert the new ChatMessage in order
-	chatlog.appendChild(messageListItem);
+	// Clear all existing ChatMessages
+	while (chatlog.firstChild) {
+		chatlog.removeChild(chatlog.firstChild);
+	}
+	// Add all the ChatMessages
+	for (var i = 0; i < chatMessages.length; i++) {
+		var chatMessage = chatMessages[i];
+		var messageListItem = document.createElement("li");
+		messageListItem.setAttribute("data-chat-id", chatMessage.id);
+		var messageText = chatMessage.username + ": " + chatMessage.text;
+		messageListItem.appendChild(document.createTextNode(messageText));
+		chatlog.appendChild(messageListItem);
+	}
 }
